@@ -1,4 +1,4 @@
-#Temporary token storage
+# Temporary token storage
 This is server which help share tokens per environments between two or more machines.
 
 ##Setup server:
@@ -7,8 +7,8 @@ This is server which help share tokens per environments between two or more mach
     node index.js (or pm2 start index.js --name tokenStorage)
     ```
 
-##Usage:
-###Save token:
+## Usage:
+### Save token:
     ```
     POST localhost:3001/{ENV_NAME}/{TOKEN}
     ```
@@ -18,7 +18,7 @@ CURL example:
     curl -X POST http://localhost:3001/dev/testtoken
     ```
 
-###Read token:
+### Read token:
     ```
     GET localhost:3001/{ENV_NAME}
     ```
