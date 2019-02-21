@@ -6,6 +6,7 @@ const util = require('util');
 const readFile = util.promisify(fs.readFile);
 const writeFile = util.promisify(fs.writeFile);
 const tokenFilePath = './token.json';
+const pagesPath = './pages';
 const Remarkable = require('remarkable');
 const md = new Remarkable();
 
@@ -19,7 +20,7 @@ app.get('/', async (req, res) => {
   res.status(200).send(html);
 });
 
-app.get('/:env', async (req, res) => {
+app.get('/token/:env', async (req, res) => {
   try {
     const jsonFile = await readFile(tokenFilePath);
     const parsedToken = JSON.parse(jsonFile);
@@ -29,11 +30,32 @@ app.get('/:env', async (req, res) => {
   }
 });
 
-app.post('/:env/:token', async (req, res) => {
+app.post('/token/:env/:token', async (req, res) => {
   try {
     const jsonFile = await readFile(tokenFilePath) || '{}';
     const parsedToken = JSON.parse(jsonFile);
 
+    parsedToken[req.params.env] = req.params.token;
+    await writeFile(tokenFilePath, JSON.stringify(parsedToken, null, 2));
+    res.status(200).send('ok');
+  } catch (error) {
+    res.status(400).send(error);
+  }
+});
+
+
+app.get('/page/:page', async (req, res) => {
+  try {
+    const html = await readFile(pagesPath + '.html');
+    res.status(200).send(html);
+  } catch (error) {
+    res.status(400).send(error);
+  }
+});
+
+app.post('/page/:page', async (req, res) => {
+  try {
+    const html = await readFile(pagesPath + '.html');
     parsedToken[req.params.env] = req.params.token;
     await writeFile(tokenFilePath, JSON.stringify(parsedToken, null, 2));
     res.status(200).send('ok');
