@@ -1,4 +1,5 @@
 const express = require('express');
+const bodyParser = require('body-parser');
 const app = express();
 const port = process.env.PORT || 3001;
 const fs = require('fs');
@@ -6,9 +7,49 @@ const util = require('util');
 const readFile = util.promisify(fs.readFile);
 const writeFile = util.promisify(fs.writeFile);
 const tokenFilePath = './token.json';
+const pagesDataFilePath = './pages_data.json';
 const pagesPath = './pages';
 const Remarkable = require('remarkable');
 const md = new Remarkable();
+
+app.use(bodyParser.json());
+
+function generateTag (data) {
+  if (!data) {
+    return '';
+  }
+  const tagName = Object.keys(data)[0];
+  const tagAttributes = Object.keys(data[tagName])
+    .reduce((acc, key) =>  acc += ` ${key}="${data[tagName][key]}"`,'');
+
+  return `<${tagName}${tagAttributes}></${tagName}>`;
+}
+
+app.get('/page/:page', async (req, res) => {
+  try {
+    const html = await readFile(`${pagesPath}/${req.params.page}.html`, 'utf8');
+    const jsonFile = await readFile(pagesDataFilePath, 'utf8') || '{}';
+    const parsedData = JSON.parse(jsonFile);
+
+    res.status(200).send(html.replace('{tag}', generateTag(parsedData[req.params.page])));
+  } catch (error) {
+    res.status(400).send(error);
+  }
+});
+
+app.post('/page/:page', async (req, res) => {
+  try {
+    const jsonFile = await readFile(pagesDataFilePath, 'utf8') || '{}';
+    const parsedData = JSON.parse(jsonFile);
+
+    parsedData[req.params.page] = req.body;
+    await writeFile(pagesDataFilePath, JSON.stringify(parsedData, null, 2));
+
+    res.status(200).send('ok');
+  } catch (error) {
+    res.status(400).send(error);
+  }
+});
 
 app.get('/', async (req, res) => {
   const readMe = await readFile('./README.md', 'utf8');
@@ -20,9 +61,9 @@ app.get('/', async (req, res) => {
   res.status(200).send(html);
 });
 
-app.get('/token/:env', async (req, res) => {
+app.get('/:env', async (req, res) => {
   try {
-    const jsonFile = await readFile(tokenFilePath);
+    const jsonFile = await readFile(tokenFilePath, 'utf8');
     const parsedToken = JSON.parse(jsonFile);
     res.status(200).send(parsedToken[req.params.env]);
   } catch (error) {
@@ -30,32 +71,11 @@ app.get('/token/:env', async (req, res) => {
   }
 });
 
-app.post('/token/:env/:token', async (req, res) => {
+app.post('/:env/:token', async (req, res) => {
   try {
-    const jsonFile = await readFile(tokenFilePath) || '{}';
+    const jsonFile = await readFile(tokenFilePath, 'utf8') || '{}';
     const parsedToken = JSON.parse(jsonFile);
 
-    parsedToken[req.params.env] = req.params.token;
-    await writeFile(tokenFilePath, JSON.stringify(parsedToken, null, 2));
-    res.status(200).send('ok');
-  } catch (error) {
-    res.status(400).send(error);
-  }
-});
-
-
-app.get('/page/:page', async (req, res) => {
-  try {
-    const html = await readFile(pagesPath + '.html');
-    res.status(200).send(html);
-  } catch (error) {
-    res.status(400).send(error);
-  }
-});
-
-app.post('/page/:page', async (req, res) => {
-  try {
-    const html = await readFile(pagesPath + '.html');
     parsedToken[req.params.env] = req.params.token;
     await writeFile(tokenFilePath, JSON.stringify(parsedToken, null, 2));
     res.status(200).send('ok');
