@@ -19,6 +19,12 @@ CURL example:
 curl -X POST http://localhost:3001/dev/testtoken
 ```
 
+### Read token:
+```
+GET localhost:3001/{ENV_NAME}
+```
+where {ENV_NAME} is environment name.
+
 ### Open HTML page:
 ```
 GET localhost:3001/page/{PAGE_NAME}
