@@ -1,5 +1,6 @@
 # [Temporary token storage](https://github.com/devballteam/tokenStorage)
 This is server which help share tokens per environments between two or more machines.
+Another feature is serving HTML file with generated HTML tag with attributes based on template from 'pages' directory and data from json file.
 
 ## Setup server:
 ```
@@ -18,8 +19,27 @@ CURL example:
 curl -X POST http://localhost:3001/dev/testtoken
 ```
 
-### Read token:
+### Open HTML page:
 ```
-GET localhost:3001/{ENV_NAME}
+GET localhost:3001/page/{PAGE_NAME}
 ```
-where {ENV_NAME} is environment name
+where {PAGE_NAME} is page name which template with tag placeholder.
+Example:
+```
+<html>
+  <head></head>
+  <body>
+    {tag}
+  </body>
+</html>
+```
+
+### Save tag data for page:
+```
+POST localhost:3001/page/{PAGE_NAME}
+```
+where {PAGE_NAME} is page name.
+CURL example:
+```
+curl -d '{"script": { "src":"https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js", "data-test":"jquery-test" }}' -H "Content-Type: application/json" -X POST http://localhost:3001/page/wrapp
+```
