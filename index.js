@@ -25,24 +25,27 @@ function generateTag (data) {
   return `<${tagName}${tagAttributes}></${tagName}>`;
 }
 
-app.get('/page/:page', async (req, res) => {
+app.get('/page/:page/:client', async (req, res) => {
   try {
     const html = await readFile(`${pagesPath}/${req.params.page}.html`, 'utf8');
     const jsonFile = await readFile(pagesDataFilePath, 'utf8') || '{}';
     const parsedData = JSON.parse(jsonFile);
 
-    res.status(200).send(html.replace('{tag}', generateTag(parsedData[req.params.page])));
+    res.status(200).send(html.replace('{tag}', generateTag(parsedData[req.params.page][req.params.client])));
   } catch (error) {
     res.status(400).send(error);
   }
 });
 
-app.post('/page/:page', async (req, res) => {
+app.post('/page/:page/:client', async (req, res) => {
   try {
     const jsonFile = await readFile(pagesDataFilePath, 'utf8') || '{}';
     const parsedData = JSON.parse(jsonFile);
 
-    parsedData[req.params.page] = req.body;
+    if (!parsedData[req.params.page]) {
+      parsedData[req.params.page] = {};
+    }
+    parsedData[req.params.page][req.params.client] = req.body;
     await writeFile(pagesDataFilePath, JSON.stringify(parsedData, null, 2));
 
     res.status(200).send('ok');

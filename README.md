@@ -27,9 +27,9 @@ where {ENV_NAME} is environment name.
 
 ### Open HTML page:
 ```
-GET localhost:3001/page/{PAGE_NAME}
+GET localhost:3001/page/{PAGE_NAME}/{CLIENT_NAME}
 ```
-where {PAGE_NAME} is page name which template with tag placeholder.
+where {PAGE_NAME} is page name which template with tag placeholder and {CLIENT_NAME} is client name for this page.
 Example:
 ```
 <html>
@@ -42,10 +42,10 @@ Example:
 
 ### Save tag data for page:
 ```
-POST localhost:3001/page/{PAGE_NAME}
+POST localhost:3001/page/{PAGE_NAME}/{CLIENT_NAME}
 ```
-where {PAGE_NAME} is page name.
+where {PAGE_NAME} is page name and {CLIENT_NAME} is client name for this page.
 CURL example:
 ```
-curl -d '{"script": { "src":"https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js", "data-test":"jquery-test" }}' -H "Content-Type: application/json" -X POST http://localhost:3001/page/wrapp
+curl -d '{"script": { "src":"https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js", "data-test":"jquery-test" }}' -H "Content-Type: application/json" -X POST http://localhost:3001/page/wrapper/firefox
 ```
